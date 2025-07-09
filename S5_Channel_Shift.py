@@ -10,7 +10,7 @@ def analyze_Channel_Shift(base_path, past, now, river_name, name):
     arcpy.env.XYTolerance = "0.001 Meters"
     arcpy.env.workspace = base_path_cf
 
-    # 中心线文件路径定义
+    # Define centerline file paths
     centerline_1970 = os.path.join(base_past, river_name)
     centerline_recent = os.path.join(base_now, river_name)
     output_intersection = 'Intersection.shp'
@@ -37,14 +37,14 @@ def analyze_Channel_Shift(base_path, past, now, river_name, name):
     arcpy.AddField_management(erase_output, "AREA_SQM", "DOUBLE")
     arcpy.CalculateField_management(erase_output, "AREA_SQM", "!shape.area!", "PYTHON3")
 
-    # 设定面积阈值筛选
+    # Set area threshold filter
     total_area = sum([row[0] for row in arcpy.da.SearchCursor(erase_output, ["AREA_SQM"])])
     threshold_area = total_area * 0.001
     significant_areas = name
     expression = f"\"AREA_SQM\" > {threshold_area}"
     arcpy.Select_analysis(erase_output, significant_areas, expression)
 
-    # 清理临时文件
+    # Clean up temporary files
     arcpy.Delete_management(output_intersection)
     arcpy.Delete_management(split_lines_1970)
     arcpy.Delete_management(split_lines_recent)
